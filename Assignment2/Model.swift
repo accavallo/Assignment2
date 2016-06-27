@@ -76,7 +76,39 @@ class MyModel: NSObject {
         newLapTime = String(format: "%02i:%02i.%02i", lapMinutes, lapSeconds, lapMilliseconds)
         
         if(delegate != nil) {
-            
+            delegate!.updateTimerLabels(newMainTime, lapTime: newLapTime)
         }
+    }
+    
+    func createLapTimer() {
+        let previousLapTime = lapTimer
+        lapTimer = NSDate.timeIntervalSinceReferenceDate()
+        
+        var currentLapTime: NSTimeInterval = lapTimer - previousLapTime + stoppedLapTime
+        stoppedLapTime = 0.0
+        
+        let minutes = UInt32(currentLapTime / 60)
+        currentLapTime -= (NSTimeInterval(minutes) * 60)
+        
+        let seconds = UInt32(currentLapTime)
+        currentLapTime -= NSTimeInterval(seconds)
+        
+        let milliseconds = UInt32(currentLapTime * 100)
+        
+        let lapTime = String(format: "%02i:%02i.%02i", minutes, seconds, milliseconds)
+        lapTimesArray.insertObject(lapTime, atIndex: 0)
+    }
+    
+    func stopTime() {
+        myTimer.invalidate()
+        stoppedMainTime = mainTimeSinceLastUpdate
+        stoppedLapTime = lapTimeSinceLastUpdate
+    }
+    
+    func resetTime() {
+        stoppedLapTime = 0.0
+        stoppedMainTime = 0.0
+        
+        delegate!.updateTimerLabels("00:00.00", lapTime: "00:00.00")
     }
 }
